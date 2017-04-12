@@ -124,7 +124,7 @@ func (it *Iterator) Next(ctx *graph.IterationContext) bool {
 		return graph.NextLogOut(it, false)
 	}
 	for {
-		result, _, err := it.iter.Next(ctx)
+		result, _, err := it.iter.Next()
 		if err != nil {
 			if err != io.EOF {
 				it.err = err
@@ -163,7 +163,7 @@ func (it *Iterator) Size() (int64, bool) {
 	return int64(it.tree.Len()), true
 }
 
-func (it *Iterator) Contains(v graph.Value) bool {
+func (it *Iterator) Contains(ctx *graph.IterationContext, v graph.Value) bool {
 	graph.ContainsLogIn(it, v)
 	if v == nil {
 		return graph.ContainsLogOut(it, v, false)

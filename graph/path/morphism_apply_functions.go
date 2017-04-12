@@ -163,7 +163,7 @@ func hasRegexMorphism(via interface{}, pattern string) morphism {
 				// Transfer dest nodes from 'all outbound' to fixed queue if they
 				// pass the regex.
 				fixed := qs.FixedIterator()
-				for out.Next() {
+				for out.Next(nil) {
 					n := out.Result()
 					if re.MatchString(qs.NameOf(n).String()) {
 						fixed.Add(n)
@@ -216,7 +216,7 @@ func hasComparisonMorphism(via interface{}, operator string, number float64) mor
 				// Transfer dest nodes from 'all outbound' to fixed queue if they
 				// pass the comparison.
 				fixed := qs.FixedIterator()
-				for out.Next() {
+				for out.Next(nil) {
 					n := out.Result()
 					fl, err := strconv.ParseFloat(qs.NameOf(n).String(), 64)
 					if err != nil {
