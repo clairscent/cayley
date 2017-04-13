@@ -59,7 +59,13 @@ func (qs *oldstore) QuadIterator(d quad.Direction, i graph.Value) graph.Iterator
 	return qs.iter
 }
 
-func (qs *oldstore) NodesAllIterator() graph.Iterator { return &Null{} }
+func (qs *oldstore) NodesAllIterator() graph.Iterator {
+	vals := []graph.Value{}
+	for _, str := range qs.data {
+		vals = append(vals, quad.String(str))
+	}
+	return NewFixed(Identity, vals...)
+}
 
 func (qs *oldstore) QuadsAllIterator() graph.Iterator { return &Null{} }
 
