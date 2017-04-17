@@ -483,8 +483,16 @@ func buildHas(qs graph.QuadStore, via interface{}, in graph.Iterator, reverse bo
 	viaIter := buildViaPath(qs, via).
 		BuildIterator()
 	ends := func() graph.Iterator {
+
 		if len(nodes) == 0 {
 			return qs.NodesAllIterator()
+		}
+
+		if len(nodes) == 1 {
+			switch p := nodes[0].(type) {
+			case graph.Var:
+				return iterator.NewVariable(qs, p.String())
+			}
 		}
 
 		fixed := qs.FixedIterator()
