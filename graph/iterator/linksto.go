@@ -202,8 +202,8 @@ func (it *LinksTo) Close() error {
 }
 
 // We won't ever have a new result, but our subiterators might.
-func (it *LinksTo) NextPath() bool {
-	ok := it.primaryIt.NextPath()
+func (it *LinksTo) NextPath(ctx *graph.IterationContext) bool {
+	ok := it.primaryIt.NextPath(ctx)
 	if !ok {
 		it.err = it.primaryIt.Err()
 	}

@@ -125,7 +125,7 @@ func (it *Recursive) Next(ctx *graph.IterationContext) bool {
 			it.subIt.TagResults(tags)
 			key := graph.ToKey(res)
 			it.pathMap[key] = append(it.pathMap[key], tags)
-			for it.subIt.NextPath() {
+			for it.subIt.NextPath(ctx) {
 				tags := make(map[string]graph.Value)
 				it.subIt.TagResults(tags)
 				it.pathMap[key] = append(it.pathMap[key], tags)
@@ -208,7 +208,7 @@ func (it *Recursive) Contains(ctx *graph.IterationContext, val graph.Value) bool
 	return graph.ContainsLogOut(it, val, false)
 }
 
-func (it *Recursive) NextPath() bool {
+func (it *Recursive) NextPath(ctx *graph.IterationContext) bool {
 	if len(it.pathMap[graph.ToKey(it.containsValue)]) <= it.pathIndex+1 {
 		return false
 	}

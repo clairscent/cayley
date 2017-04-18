@@ -49,13 +49,13 @@ func (c *IterateChain) next() bool {
 	}
 	return ok
 }
-func (c *IterateChain) nextPath() bool {
+func (c *IterateChain) nextPath(ctx *IterationContext) bool {
 	select {
 	case <-c.ctx.Done():
 		return false
 	default:
 	}
-	ok := c.paths && (c.limit < 0 || c.n < c.limit) && c.it.NextPath()
+	ok := c.paths && (c.limit < 0 || c.n < c.limit) && c.it.NextPath(ctx)
 	if ok {
 		c.n++
 	}
@@ -127,7 +127,7 @@ func (c *IterateChain) Each(fnc func(Value)) error {
 		default:
 		}
 		fnc(c.it.Result())
-		for c.nextPath() {
+		for c.nextPath(nil) {
 			select {
 			case <-done:
 				return c.ctx.Err()
@@ -153,7 +153,7 @@ iteration:
 		default:
 		}
 		out = append(out, c.it.Result())
-		for c.nextPath() {
+		for c.nextPath(nil) {
 			select {
 			case <-done:
 				break iteration
@@ -178,7 +178,7 @@ func (c *IterateChain) Send(out chan<- Value) error {
 			return c.ctx.Err()
 		case out <- c.it.Result():
 		}
-		for c.nextPath() {
+		for c.nextPath(nil) {
 			select {
 			case <-done:
 				return c.ctx.Err()
@@ -204,7 +204,7 @@ func (c *IterateChain) TagEach(fnc func(map[string]Value)) error {
 		tags := make(map[string]Value)
 		c.it.TagResults(tags)
 		fnc(tags)
-		for c.nextPath() {
+		for c.nextPath(nil) {
 			select {
 			case <-done:
 				return c.ctx.Err()
@@ -278,7 +278,7 @@ func (c *IterateChain) SendValues(qs QuadStore, out chan<- quad.Value) error {
 			return c.ctx.Err()
 		case out <- c.qs.NameOf(c.it.Result()):
 		}
-		for c.nextPath() {
+		for c.nextPath(nil) {
 			select {
 			case <-done:
 				return c.ctx.Err()

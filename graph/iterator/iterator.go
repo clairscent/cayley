@@ -100,7 +100,7 @@ func (it *Null) SubIterators() []graph.Iterator {
 	return nil
 }
 
-func (it *Null) NextPath() bool {
+func (it *Null) NextPath(ctx *graph.IterationContext) bool {
 	return false
 }
 
