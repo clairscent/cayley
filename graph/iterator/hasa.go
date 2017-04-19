@@ -165,7 +165,7 @@ func (it *HasA) Contains(ctx *graph.IterationContext, val graph.Value) bool {
 // result iterator (a quad iterator based on the last checked value) and returns true if
 // another match is made.
 func (it *HasA) NextContains(ctx *graph.IterationContext) bool {
-	for it.resultIt.Next(nil) {
+	for it.resultIt.Next(ctx) {
 		it.runstats.ContainsNext += 1
 		link := it.resultIt.Result()
 		if clog.V(4) {
