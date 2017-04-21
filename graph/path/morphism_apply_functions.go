@@ -501,6 +501,7 @@ func buildHas(qs graph.QuadStore, via interface{}, in graph.Iterator, reverse bo
 		}
 		return fixed
 	}()
+	_ = buildViaPath(qs, via).BuildIterator()
 
 	start, goal := quad.Subject, quad.Object
 	if reverse {
@@ -509,6 +510,7 @@ func buildHas(qs graph.QuadStore, via interface{}, in graph.Iterator, reverse bo
 
 	trail := iterator.NewLinksTo(qs, viaIter, quad.Predicate)
 	dest := iterator.NewLinksTo(qs, ends, goal)
+	graph.DescribeIteratorTree(trail, "")
 
 	// If we were given nodes, intersecting with them first will
 	// be extremely cheap-- otherwise, it will be the most expensive
@@ -523,7 +525,8 @@ func buildHas(qs graph.QuadStore, via interface{}, in graph.Iterator, reverse bo
 	// This looks backwards. That's OK-- see the note above.
 	route := join(qs, dest, trail)
 	has := iterator.NewHasA(qs, route, start)
-	return join(qs, has, in)
+	res := join(qs, has, in)
+	return res
 }
 
 func buildSave(
