@@ -510,7 +510,6 @@ func buildHas(qs graph.QuadStore, via interface{}, in graph.Iterator, reverse bo
 
 	trail := iterator.NewLinksTo(qs, viaIter, quad.Predicate)
 	dest := iterator.NewLinksTo(qs, ends, goal)
-	graph.DescribeIteratorTree(trail, "")
 
 	// If we were given nodes, intersecting with them first will
 	// be extremely cheap-- otherwise, it will be the most expensive
