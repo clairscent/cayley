@@ -214,20 +214,19 @@ func (it *Recursive) Contains(ctx *graph.IterationContext, val graph.Value) bool
 
 	graph.ContainsLogIn(it, val)
 	it.pathIndex = 0
-	if at, ok := it.seen[graph.ToKey(val)]; ok {
+	key := graph.ToKey(val)
+	if at, ok := it.seen[key]; ok {
 		it.containsValue = it.getBaseValue(val)
 		it.result.depth = at.depth
 		it.result.val = val
 		return graph.ContainsLogOut(it, val, true)
 	}
-	i := 0
 	for it.Next(ctx) {
-		i++
 		if it.Result() == val {
+
 			return graph.ContainsLogOut(it, val, true)
 		}
 	}
-	_ = i
 	return graph.ContainsLogOut(it, val, false)
 }
 
