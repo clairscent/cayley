@@ -159,7 +159,7 @@ iteration:
 		default:
 		}
 		cnt++
-		for c.nextPath() {
+		for c.nextPath(nil) {
 			select {
 			case <-done:
 				break iteration
@@ -324,7 +324,7 @@ func (c *IterateChain) SendValues(qs QuadStore, out chan<- quad.Value) error {
 		if err := send(c.it.Result()); err != nil {
 			return err
 		}
-		for c.nextPath() {
+		for c.nextPath(nil) {
 			if err := send(c.it.Result()); err != nil {
 				return err
 			}
