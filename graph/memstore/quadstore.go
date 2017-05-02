@@ -15,6 +15,7 @@
 package memstore
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -33,9 +34,9 @@ func init() {
 		NewFunc: func(string, graph.Options) (graph.QuadStore, error) {
 			return newQuadStore(), nil
 		},
-		UpgradeFunc:       nil,
-		InitFunc:          nil,
-		IsPersistent:      false,
+		UpgradeFunc:  nil,
+		InitFunc:     nil,
+		IsPersistent: false,
 	})
 }
 
@@ -130,6 +131,10 @@ func newQuadStore() *QuadStore {
 		nextID:     1,
 		nextQuadID: 1,
 	}
+}
+
+func (qs *QuadStore) ApplyDeltaStream(in <-chan graph.Delta, opts graph.IgnoreOpts) error {
+	return errors.New("not implemented")
 }
 
 func (qs *QuadStore) WriteQuad(q quad.Quad) error {

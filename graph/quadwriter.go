@@ -133,6 +133,7 @@ type QuadWriter interface {
 	// TODO(barakmich): Deprecate in favor of transaction.
 	// AddQuadSet adds a set of quads to the store, atomically if possible.
 	AddQuadSet([]quad.Quad) error
+	AddQuadStream(quads <-chan quad.Quad) error
 
 	// RemoveQuad removes a quad matching the given one  from the database,
 	// if it exists. Does nothing otherwise.

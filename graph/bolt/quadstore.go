@@ -33,10 +33,10 @@ import (
 
 func init() {
 	graph.RegisterQuadStore(QuadStoreType, graph.QuadStoreRegistration{
-		NewFunc:           newQuadStore,
-		UpgradeFunc:       upgradeBolt,
-		InitFunc:          createNewBolt,
-		IsPersistent:      true,
+		NewFunc:      newQuadStore,
+		UpgradeFunc:  upgradeBolt,
+		InitFunc:     createNewBolt,
+		IsPersistent: true,
 	})
 }
 
@@ -237,6 +237,10 @@ func deltaToProto(delta graph.Delta) proto.LogDelta {
 	newd.Timestamp = delta.Timestamp.UnixNano()
 	newd.Quad = pquads.MakeQuad(delta.Quad)
 	return newd
+}
+
+func (qs *QuadStore) ApplyDeltaStream(in <-chan graph.Delta, opts graph.IgnoreOpts) error {
+	return errors.New("not implemented")
 }
 
 func (qs *QuadStore) ApplyDeltas(deltas []graph.Delta, ignoreOpts graph.IgnoreOpts) error {
