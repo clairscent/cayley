@@ -214,7 +214,7 @@ func (qs *QuadStore) indexOf(t quad.Quad) (int64, bool) {
 	}
 
 	it := NewIterator(tree, qs, 0, nil)
-	for it.Next() {
+	for it.Next(nil) {
 		if t == qs.log[it.result].Quad {
 			return it.result, true
 		}

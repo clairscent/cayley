@@ -82,7 +82,7 @@ func (it *Optional) Result() graph.Value {
 }
 
 // Optional iterator cannot be Next()'ed.
-func (it *Optional) Next() bool {
+func (it *Optional) Next(ctx *graph.IterationContext) bool {
 	clog.Errorf("Nexting an un-nextable iterator: %T", it)
 	return false
 }
@@ -93,9 +93,9 @@ func (it *Optional) NoNext() {}
 // An optional iterator only has a next result if, (a) last time we checked
 // we had any results whatsoever, and (b) there was another subresult in our
 // optional subbranch.
-func (it *Optional) NextPath() bool {
+func (it *Optional) NextPath(ctx *graph.IterationContext) bool {
 	if it.lastCheck {
-		ok := it.subIt.NextPath()
+		ok := it.subIt.NextPath(ctx)
 		if !ok {
 			it.err = it.subIt.Err()
 		}
@@ -111,8 +111,8 @@ func (it *Optional) SubIterators() []graph.Iterator {
 // Contains() is the real hack of this iterator. It always returns true, regardless
 // of whether the subiterator matched. But we keep track of whether the subiterator
 // matched for results purposes.
-func (it *Optional) Contains(val graph.Value) bool {
-	checked := it.subIt.Contains(val)
+func (it *Optional) Contains(ctx *graph.IterationContext, val graph.Value) bool {
+	checked := it.subIt.Contains(ctx, val)
 	it.lastCheck = checked
 	it.err = it.subIt.Err()
 	it.result = val

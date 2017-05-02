@@ -163,7 +163,7 @@ func hasRegexMorphism(via interface{}, pattern string) morphism {
 				// Transfer dest nodes from 'all outbound' to fixed queue if they
 				// pass the regex.
 				fixed := qs.FixedIterator()
-				for out.Next() {
+				for out.Next(nil) {
 					n := out.Result()
 					if re.MatchString(qs.NameOf(n).String()) {
 						fixed.Add(n)
@@ -216,7 +216,7 @@ func hasComparisonMorphism(via interface{}, operator string, number float64) mor
 				// Transfer dest nodes from 'all outbound' to fixed queue if they
 				// pass the comparison.
 				fixed := qs.FixedIterator()
-				for out.Next() {
+				for out.Next(nil) {
 					n := out.Result()
 					fl, err := strconv.ParseFloat(qs.NameOf(n).String(), 64)
 					if err != nil {
@@ -483,8 +483,16 @@ func buildHas(qs graph.QuadStore, via interface{}, in graph.Iterator, reverse bo
 	viaIter := buildViaPath(qs, via).
 		BuildIterator()
 	ends := func() graph.Iterator {
+
 		if len(nodes) == 0 {
 			return qs.NodesAllIterator()
+		}
+
+		if len(nodes) == 1 {
+			switch p := nodes[0].(type) {
+			case graph.Var:
+				return iterator.NewVariable(qs, p.String())
+			}
 		}
 
 		fixed := qs.FixedIterator()
@@ -493,6 +501,7 @@ func buildHas(qs graph.QuadStore, via interface{}, in graph.Iterator, reverse bo
 		}
 		return fixed
 	}()
+	_ = buildViaPath(qs, via).BuildIterator()
 
 	start, goal := quad.Subject, quad.Object
 	if reverse {
@@ -515,7 +524,8 @@ func buildHas(qs graph.QuadStore, via interface{}, in graph.Iterator, reverse bo
 	// This looks backwards. That's OK-- see the note above.
 	route := join(qs, dest, trail)
 	has := iterator.NewHasA(qs, route, start)
-	return join(qs, has, in)
+	res := join(qs, has, in)
+	return res
 }
 
 func buildSave(

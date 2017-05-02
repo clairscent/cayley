@@ -2,6 +2,7 @@ package iterator
 
 import (
 	"math"
+	"reflect"
 
 	"github.com/codelingo/cayley/graph"
 	"github.com/codelingo/cayley/quad"
@@ -27,6 +28,7 @@ type Recursive struct {
 	depthTags     graph.Tagger
 	depthCache    []graph.Value
 	baseIt        graph.FixedIterator
+	vars          map[string]graph.Value
 }
 
 type seenAt struct {
@@ -115,17 +117,17 @@ func (it *Recursive) SubIterators() []graph.Iterator {
 	return []graph.Iterator{it.subIt}
 }
 
-func (it *Recursive) Next() bool {
+func (it *Recursive) Next(ctx *graph.IterationContext) bool {
 	it.pathIndex = 0
 	if it.depth == 0 {
-		for it.subIt.Next() {
+		for it.subIt.Next(ctx) {
 			res := it.subIt.Result()
 			it.depthCache = append(it.depthCache, it.subIt.Result())
 			tags := make(map[string]graph.Value)
 			it.subIt.TagResults(tags)
 			key := graph.ToKey(res)
 			it.pathMap[key] = append(it.pathMap[key], tags)
-			for it.subIt.NextPath() {
+			for it.subIt.NextPath(ctx) {
 				tags := make(map[string]graph.Value)
 				it.subIt.TagResults(tags)
 				it.pathMap[key] = append(it.pathMap[key], tags)
@@ -133,7 +135,7 @@ func (it *Recursive) Next() bool {
 		}
 	}
 	for {
-		ok := it.nextIt.Next()
+		ok := it.nextIt.Next(ctx)
 		if !ok {
 			if len(it.depthCache) == 0 {
 				return graph.NextLogOut(it, false)
@@ -191,7 +193,22 @@ func (it *Recursive) getBaseValue(val graph.Value) graph.Value {
 	return at.val
 }
 
-func (it *Recursive) Contains(val graph.Value) bool {
+func (it *Recursive) ResetIfVarsUpdated(ctx *graph.IterationContext) {
+	if ctx != nil {
+		newVars := ctx.Values()
+		// Using reflect is not ideal, and we should also not be throwing all this
+		// information away, it could be useful if we have the same var value at a
+		// later point.
+		if !reflect.DeepEqual(newVars, it.vars) {
+			it.Reset()
+			it.vars = newVars
+		}
+	}
+}
+
+func (it *Recursive) Contains(ctx *graph.IterationContext, val graph.Value) bool {
+	it.ResetIfVarsUpdated(ctx)
+
 	graph.ContainsLogIn(it, val)
 	it.pathIndex = 0
 	key := graph.ToKey(val)
@@ -201,15 +218,16 @@ func (it *Recursive) Contains(val graph.Value) bool {
 		it.result.val = val
 		return graph.ContainsLogOut(it, val, true)
 	}
-	for it.Next() {
-		if graph.ToKey(it.Result()) == key {
+	for it.Next(ctx) {
+		if it.Result() == val {
+
 			return graph.ContainsLogOut(it, val, true)
 		}
 	}
 	return graph.ContainsLogOut(it, val, false)
 }
 
-func (it *Recursive) NextPath() bool {
+func (it *Recursive) NextPath(ctx *graph.IterationContext) bool {
 	if len(it.pathMap[graph.ToKey(it.containsValue)]) <= it.pathIndex+1 {
 		return false
 	}

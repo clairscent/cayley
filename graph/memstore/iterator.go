@@ -118,7 +118,7 @@ func (it *Iterator) checkValid(index int64) bool {
 	return it.qs.log[index].DeletedBy == 0
 }
 
-func (it *Iterator) Next() bool {
+func (it *Iterator) Next(ctx *graph.IterationContext) bool {
 	graph.NextLogIn(it)
 	if it.iter == nil {
 		return graph.NextLogOut(it, false)
@@ -150,7 +150,7 @@ func (it *Iterator) Result() graph.Value {
 	return iterator.Int64Quad(it.result)
 }
 
-func (it *Iterator) NextPath() bool {
+func (it *Iterator) NextPath(ctx *graph.IterationContext) bool {
 	return false
 }
 
@@ -163,7 +163,7 @@ func (it *Iterator) Size() (int64, bool) {
 	return int64(it.tree.Len()), true
 }
 
-func (it *Iterator) Contains(v graph.Value) bool {
+func (it *Iterator) Contains(ctx *graph.IterationContext, v graph.Value) bool {
 	graph.ContainsLogIn(it, v)
 	if v == nil {
 		return graph.ContainsLogOut(it, v, false)

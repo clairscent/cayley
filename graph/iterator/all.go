@@ -100,7 +100,7 @@ func (it *Int64) Describe() graph.Description {
 
 // Next() on an Int64 all iterator is a simple incrementing counter.
 // Return the next integer, and mark it as the result.
-func (it *Int64) Next() bool {
+func (it *Int64) Next(ctx *graph.IterationContext) bool {
 	graph.NextLogIn(it)
 	it.runstats.Next += 1
 	if it.at == -1 {
@@ -130,7 +130,7 @@ func (it *Int64) Result() graph.Value {
 	return it.toValue(it.result)
 }
 
-func (it *Int64) NextPath() bool {
+func (it *Int64) NextPath(ctx *graph.IterationContext) bool {
 	return false
 }
 
@@ -146,8 +146,8 @@ func (it *Int64) Size() (int64, bool) {
 	return Size, true
 }
 
-func valToInt64(v graph.Value) int64{
-	if v, ok := v.(Int64Node); ok{
+func valToInt64(v graph.Value) int64 {
+	if v, ok := v.(Int64Node); ok {
 		return int64(v)
 	}
 	return int64(v.(Int64Quad))
@@ -155,7 +155,7 @@ func valToInt64(v graph.Value) int64{
 
 // Contains() for an Int64 is merely seeing if the passed value is
 // within the range, assuming the value is an int64.
-func (it *Int64) Contains(tsv graph.Value) bool {
+func (it *Int64) Contains(ctx *graph.IterationContext, tsv graph.Value) bool {
 	graph.ContainsLogIn(it, tsv)
 	it.runstats.Contains += 1
 	v := valToInt64(tsv)

@@ -193,8 +193,8 @@ func (it *Comparison) Clone() graph.Iterator {
 	return out
 }
 
-func (it *Comparison) Next() bool {
-	for it.subIt.Next() {
+func (it *Comparison) Next(ctx *graph.IterationContext) bool {
+	for it.subIt.Next(ctx) {
 		val := it.subIt.Result()
 		if it.doComparison(val) {
 			it.result = val
@@ -213,9 +213,9 @@ func (it *Comparison) Result() graph.Value {
 	return it.result
 }
 
-func (it *Comparison) NextPath() bool {
+func (it *Comparison) NextPath(ctx *graph.IterationContext) bool {
 	for {
-		hasNext := it.subIt.NextPath()
+		hasNext := it.subIt.NextPath(ctx)
 		if !hasNext {
 			it.err = it.subIt.Err()
 			return false
@@ -232,11 +232,11 @@ func (it *Comparison) SubIterators() []graph.Iterator {
 	return []graph.Iterator{it.subIt}
 }
 
-func (it *Comparison) Contains(val graph.Value) bool {
+func (it *Comparison) Contains(ctx *graph.IterationContext, val graph.Value) bool {
 	if !it.doComparison(val) {
 		return false
 	}
-	ok := it.subIt.Contains(val)
+	ok := it.subIt.Contains(ctx, val)
 	if !ok {
 		it.err = it.subIt.Err()
 	}

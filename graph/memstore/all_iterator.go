@@ -41,9 +41,9 @@ func (it *nodesAllIterator) SubIterators() []graph.Iterator {
 	return nil
 }
 
-func (it *nodesAllIterator) Next() bool {
+func (it *nodesAllIterator) Next(ctx *graph.IterationContext) bool {
 	for {
-		if !it.Int64.Next() {
+		if !it.Int64.Next(ctx) {
 			return false
 		}
 		_, ok := it.qs.revIDMap[int64(it.Int64.Result().(iterator.Int64Node))]
@@ -65,9 +65,9 @@ func newQuadsAllIterator(qs *QuadStore) *quadsAllIterator {
 	return &out
 }
 
-func (it *quadsAllIterator) Next() bool {
+func (it *quadsAllIterator) Next(ctx *graph.IterationContext) bool {
 	for {
-		if !it.Int64.Next() {
+		if !it.Int64.Next(ctx) {
 			return false
 		}
 		i64 := int64(it.Int64.Result().(iterator.Int64Quad))

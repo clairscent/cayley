@@ -112,7 +112,7 @@ func (it *Iterator) Close() error {
 	return nil
 }
 
-func (it *Iterator) Next() bool {
+func (it *Iterator) Next(ctx *graph.IterationContext) bool {
 	if it.done {
 		return false
 	}
@@ -196,7 +196,7 @@ func (it *Iterator) Result() graph.Value {
 	return &Token{bucket: it.bucket, key: it.buffer[it.offset]}
 }
 
-func (it *Iterator) NextPath() bool {
+func (it *Iterator) NextPath(ctx *graph.IterationContext) bool {
 	return false
 }
 
@@ -257,7 +257,7 @@ func PositionOf(tok *Token, d quad.Direction, qs *QuadStore) int {
 	panic("unreachable")
 }
 
-func (it *Iterator) Contains(v graph.Value) bool {
+func (it *Iterator) Contains(ctx *graph.IterationContext, v graph.Value) bool {
 	val := v.(*Token)
 	if bytes.Equal(val.bucket, nodeBucket) {
 		return false

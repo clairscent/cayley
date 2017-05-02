@@ -20,7 +20,7 @@ func newTestIterator(next bool, err error) graph.Iterator {
 	}
 }
 
-func (it *testIterator) Next() bool {
+func (it *testIterator) Next(ctx *graph.IterationContext) bool {
 	return it.NextVal
 }
 
