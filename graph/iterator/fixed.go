@@ -121,8 +121,8 @@ func (it *Fixed) Describe() graph.Description {
 // Register this iterator as a Fixed iterator.
 func (it *Fixed) Type() graph.Type { return graph.Fixed }
 
-// Check if the passed value is equal to one of the values stored in the iterator.
-func (it *Fixed) Contains(v graph.Value) bool {
+// Contains checks if the passed value is equal to one of the values stored in the iterator.
+func (it *Fixed) Contains(ctx *graph.IterationContext, v graph.Value) bool {
 	// Could be optimized by keeping it sorted or using a better datastructure.
 	// However, for fixed iterators, which are by definition kind of tiny, this
 	// isn't a big issue.
@@ -137,7 +137,7 @@ func (it *Fixed) Contains(v graph.Value) bool {
 }
 
 // Next advances the iterator.
-func (it *Fixed) Next() bool {
+func (it *Fixed) Next(ctx *graph.IterationContext) bool {
 	graph.NextLogIn(it)
 	if it.lastIndex == len(it.values) {
 		return graph.NextLogOut(it, false)
@@ -156,7 +156,7 @@ func (it *Fixed) Result() graph.Value {
 	return it.result
 }
 
-func (it *Fixed) NextPath() bool {
+func (it *Fixed) NextPath(ctx *graph.IterationContext) bool {
 	return false
 }
 

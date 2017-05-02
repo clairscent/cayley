@@ -109,8 +109,8 @@ func (it *Regex) Clone() graph.Iterator {
 	return out
 }
 
-func (it *Regex) Next() bool {
-	for it.subIt.Next() {
+func (it *Regex) Next(ctx *graph.IterationContext) bool {
+	for it.subIt.Next(ctx) {
 		val := it.subIt.Result()
 		if it.testRegex(val) {
 			it.result = val
@@ -129,9 +129,9 @@ func (it *Regex) Result() graph.Value {
 	return it.result
 }
 
-func (it *Regex) NextPath() bool {
+func (it *Regex) NextPath(ctx *graph.IterationContext) bool {
 	for {
-		hasNext := it.subIt.NextPath()
+		hasNext := it.subIt.NextPath(ctx)
 		if !hasNext {
 			it.err = it.subIt.Err()
 			return false
@@ -148,11 +148,11 @@ func (it *Regex) SubIterators() []graph.Iterator {
 	return []graph.Iterator{it.subIt}
 }
 
-func (it *Regex) Contains(val graph.Value) bool {
+func (it *Regex) Contains(ctx *graph.IterationContext, val graph.Value) bool {
 	if !it.testRegex(val) {
 		return false
 	}
-	ok := it.subIt.Contains(val)
+	ok := it.subIt.Contains(ctx, val)
 	if !ok {
 		it.err = it.subIt.Err()
 	}

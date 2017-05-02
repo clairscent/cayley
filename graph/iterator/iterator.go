@@ -64,7 +64,7 @@ func (it *Null) TagResults(dst map[string]graph.Value) {
 	}
 }
 
-func (it *Null) Contains(graph.Value) bool {
+func (it *Null) Contains(*graph.IterationContext, graph.Value) bool {
 	return false
 }
 
@@ -84,7 +84,7 @@ func (it *Null) Describe() graph.Description {
 	}
 }
 
-func (it *Null) Next() bool {
+func (it *Null) Next(ctx *graph.IterationContext) bool {
 	return false
 }
 
@@ -100,7 +100,7 @@ func (it *Null) SubIterators() []graph.Iterator {
 	return nil
 }
 
-func (it *Null) NextPath() bool {
+func (it *Null) NextPath(ctx *graph.IterationContext) bool {
 	return false
 }
 

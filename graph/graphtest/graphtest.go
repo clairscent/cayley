@@ -696,7 +696,7 @@ func TestIteratorsAndNextResultOrderA(t testing.TB, gen DatabaseFunc) {
 	)
 	for {
 		got = append(got, qs.NameOf(all.Result()).String())
-		if !outerAnd.NextPath() {
+		if !outerAnd.NextPath(nil) {
 			break
 		}
 	}

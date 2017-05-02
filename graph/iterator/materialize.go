@@ -185,17 +185,17 @@ func (it *Materialize) Stats() graph.IteratorStats {
 	}
 }
 
-func (it *Materialize) Next() bool {
+func (it *Materialize) Next(ctx *graph.IterationContext) bool {
 	graph.NextLogIn(it)
 	it.runstats.Next += 1
 	if !it.hasRun {
-		it.materializeSet()
+		it.materializeSet(ctx)
 	}
 	if it.err != nil {
 		return false
 	}
 	if it.aborted {
-		n := it.subIt.Next()
+		n := it.subIt.Next(ctx)
 		it.err = it.subIt.Err()
 		return n
 	}
@@ -212,17 +212,17 @@ func (it *Materialize) Err() error {
 	return it.err
 }
 
-func (it *Materialize) Contains(v graph.Value) bool {
+func (it *Materialize) Contains(ctx *graph.IterationContext, v graph.Value) bool {
 	graph.ContainsLogIn(it, v)
 	it.runstats.Contains += 1
 	if !it.hasRun {
-		it.materializeSet()
+		it.materializeSet(ctx)
 	}
 	if it.err != nil {
 		return false
 	}
 	if it.aborted {
-		return it.subIt.Contains(v)
+		return it.subIt.Contains(ctx, v)
 	}
 	key := graph.ToKey(v)
 	if i, ok := it.containsMap[key]; ok {
@@ -233,15 +233,15 @@ func (it *Materialize) Contains(v graph.Value) bool {
 	return graph.ContainsLogOut(it, v, false)
 }
 
-func (it *Materialize) NextPath() bool {
+func (it *Materialize) NextPath(ctx *graph.IterationContext) bool {
 	if !it.hasRun {
-		it.materializeSet()
+		it.materializeSet(ctx)
 	}
 	if it.err != nil {
 		return false
 	}
 	if it.aborted {
-		return it.subIt.NextPath()
+		return it.subIt.NextPath(ctx)
 	}
 
 	it.subindex++
@@ -253,9 +253,9 @@ func (it *Materialize) NextPath() bool {
 	return true
 }
 
-func (it *Materialize) materializeSet() {
+func (it *Materialize) materializeSet(ctx *graph.IterationContext) {
 	i := 0
-	for it.subIt.Next() {
+	for it.subIt.Next(ctx) {
 		i++
 		if i > abortMaterializeAt {
 			it.aborted = true
@@ -272,7 +272,7 @@ func (it *Materialize) materializeSet() {
 		it.subIt.TagResults(tags)
 		it.values[index] = append(it.values[index], result{id: id, tags: tags})
 		it.actualSize += 1
-		for it.subIt.NextPath() {
+		for it.subIt.NextPath(ctx) {
 			i++
 			if i > abortMaterializeAt {
 				it.aborted = true

@@ -671,7 +671,7 @@ func LoadIteratorTo(ctx context.Context, qs graph.QuadStore, dst reflect.Value, 
 		for k, v := range mp {
 			mo[k] = []graph.Value{v}
 		}
-		for it.NextPath() {
+		for it.NextPath(nil) {
 			select {
 			case <-ctx.Done():
 				return ctx.Err()

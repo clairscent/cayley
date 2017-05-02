@@ -94,7 +94,7 @@ type Iterator interface {
 	// the Result method. It returns false if no further advancement is possible, or if an
 	// error was encountered during iteration.  Err should be consulted to distinguish
 	// between the two cases.
-	Next() bool
+	Next(*IterationContext) bool
 
 	// These methods are the heart and soul of the iterator, as they constitute
 	// the iteration interface.
@@ -104,7 +104,7 @@ type Iterator interface {
 	//  for graph.Next(it) {
 	//  	val := it.Result()
 	//  	... do things with val.
-	//  	for it.NextPath() {
+	//  	for it.NextPath(ctx) {
 	//  		... find other paths to iterate
 	//  	}
 	//  }
@@ -114,10 +114,10 @@ type Iterator interface {
 	//
 	// NextPath() advances iterators that may have more than one valid result,
 	// from the bottom up.
-	NextPath() bool
+	NextPath(*IterationContext) bool
 
 	// Contains returns whether the value is within the set held by the iterator.
-	Contains(Value) bool
+	Contains(*IterationContext, Value) bool
 
 	// Err returns any error that was encountered by the Iterator.
 	Err() error
@@ -205,6 +205,67 @@ func Height(it Iterator, until Type) int {
 	return maxDepth + 1
 }
 
+// DescribeIteratorTree prints a tree representation an iterator
+// and its descendants
+func DescribeIteratorTree(it Iterator, indentation string) {
+	fmt.Println(indentation + it.Type().String() + "\t" + it.Describe().Name)
+	for _, subIt := range it.SubIterators() {
+		if subIt != nil {
+			DescribeIteratorTree(subIt, indentation+"  ")
+		}
+	}
+}
+
+// IterationContext keeps state for a given iteration.  Currently it stores the values of variables.
+type IterationContext struct {
+	values  map[string]Value
+	isBound map[string]bool
+	subIts  map[string]Iterator
+}
+
+func NewIterationContext() *IterationContext {
+	return &IterationContext{
+		values:  map[string]Value{},
+		isBound: map[string]bool{},
+		subIts:  map[string]Iterator{},
+	}
+}
+
+// BindVariable binds a variable if it has not already been bound.
+func (c *IterationContext) BindVariable(qs QuadStore, varName string) bool {
+	if val, ok := c.isBound[varName]; ok && val {
+		return false
+	}
+	c.isBound[varName] = true
+	c.subIts[varName] = qs.NodesAllIterator()
+	return true
+}
+
+// Values returns the current values of all the variables in this context
+func (c *IterationContext) Values() map[string]Value {
+	varNames := map[string]Value{}
+	for varName := range c.subIts {
+		varNames[varName] = c.CurrentValue(varName)
+	}
+	return varNames
+}
+
+// CurrentValue gets the value of the variable of name varName
+func (c *IterationContext) CurrentValue(varName string) Value {
+	return c.subIts[varName].Result()
+}
+
+// Next calls next on the subiterator that provides the value source for the variable
+// of name varName
+func (c *IterationContext) Next(varName string) bool {
+	if c.subIts[varName].Next(c) {
+		c.values[varName] = c.subIts[varName].Result()
+		return true
+	}
+	c.values[varName] = nil
+	return false
+}
+
 // FixedIterator wraps iterators that are modifiable by addition of fixed value sets.
 type FixedIterator interface {
 	Iterator
@@ -235,6 +296,7 @@ const (
 	Comparison
 	Null
 	Fixed
+	Variable
 	Not
 	Optional
 	Materialize
@@ -262,6 +324,7 @@ var (
 		"comparison",
 		"null",
 		"fixed",
+		"variable",
 		"not",
 		"optional",
 		"materialize",
